@@ -7,7 +7,7 @@ A unique domain for each service in docker-compose.yml. Look for TODOs in **dock
 ## Installation
 1. Provision a server with contents of **provision-script.sh**. This will install Docker and set up a directory where the LetsEncrypt certificates will be stored.
 2. Update docker-compose.yml TODOs
-	a. Make sure to have subdomains set up.
+	1. Make sure to have subdomains set up.
 3. Build images using command below
 4. Run images using command below
 5. Navigate to your subdomains.
