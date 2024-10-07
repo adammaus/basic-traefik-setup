@@ -6,15 +6,17 @@ A unique domain for each service in docker-compose.yml. Look for TODOs in **dock
 
 ## Installation
 1. Provision a server with contents of **provision-script.sh**. This will install Docker and set up a directory where the LetsEncrypt certificates will be stored.
-2. Build images using command below
-3. Run images using command below
-4. Navigate to your subdomains.
+2. Update docker-compose.yml TODOs
+	a. Make sure to have subdomains set up.
+3. Build images using command below
+4. Run images using command below
+5. Navigate to your subdomains.
 
 ## Build images - Handles pulling Traefik, building containers without using the cache
 * docker compose build --no-cache
 
 ## Run Images - Allows you to access services and to remove old containers
-docker compose up -d --remove-orphans
+* docker compose up -d --remove-orphans
 
 ## Possible use case
 * Our server has two domains associated with it. For example, api-v1.domain.com, domain.com. api-v1.domain.com stores all the API routes for v1 of the API. domain.com is the main website.
