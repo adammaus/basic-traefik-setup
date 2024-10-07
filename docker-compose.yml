@@ -1,0 +1,64 @@
+services:
+  traefik:
+    image: traefik:latest
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080 # Traefik Dashboard (insecure). TODO: Remove if you don't want it.
+    networks:
+      - proxy
+    command:
+      - --api.insecure=true # Enables Traefik Dashboard located at http://<server ip address>:8080/
+      - --providers.docker=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entryPoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.asDefault=true
+      - --entrypoints.websecure.http.tls.certresolver=myresolver
+      - --certificatesresolvers.myresolver.acme.email=abc@123.com # TODO: Add your email address here for SSL cert
+      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./letsencrypt:/letsencrypt # Volume where SSL certificates are stored
+
+  hello-alice: # This domain will say "Hello Alice!"
+    image: hello-alice
+    networks:
+      - proxy
+    labels:
+      - traefik.http.routers.app1.rule=Host(`alice.domain.com`) # TODO: Set domain for Alice app
+      - traefik.http.routers.app1.entrypoints=websecure
+      - traefik.http.routers.app1.tls.certresolver=myresolver # Use defined certresolver
+      - traefik.http.services.app1.loadbalancer.server.port=80 # Internal port app is running on
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.port=443
+    build:
+      context: .
+      dockerfile: v1-hello-dockerfile
+      args: # Inject configuration variables
+        NAME: Alice
+
+  hello-bob: # This domain will say "Hello Bob!"
+    image: hello-bob
+    networks:
+      - proxy
+    labels:
+      - traefik.http.routers.app2.rule=Host(`bob.domain.com`) # TODO: Set domain for Bob app
+      - traefik.http.routers.app2.entrypoints=websecure
+      - traefik.http.routers.app2.tls.certresolver=myresolver # Use defined certresolver
+      - traefik.http.services.app2.loadbalancer.server.port=80 # Internal port app is running on
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.port=443
+    build:
+      context: .
+      dockerfile: v1-hello-dockerfile
+      args: # Inject configuration variables
+        NAME: Bob
+
+networks:
+  proxy:
+    name: proxy

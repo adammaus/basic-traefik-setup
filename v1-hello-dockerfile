@@ -1,0 +1,10 @@
+FROM nginx:latest
+
+# Defines a variable to pass at build-time
+ARG NAME
+
+# Set environment variable to be accessible in running container
+ENV NAME=${NAME}
+
+# The basic app is just an HTML page that says "Hello <environment variable NAME>"
+RUN echo "Hello $NAME!" > /usr/share/nginx/html/index.html
